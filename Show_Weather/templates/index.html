@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-5">Weather App</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group row">
+                <label for="country" class="col-sm-2 col-form-label">Country</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="country" name="country" placeholder="Enter country name">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="state" class="col-sm-2 col-form-label">State</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="state" name="state" placeholder="Enter state name">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="city" class="col-sm-2 col-form-label">City</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="city" name="city" placeholder="Enter city name">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <div id="weather-data" class="mt-5"></div>
+    </div>
+
+    <script>
+        $('form').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: {
+                    country: $('#country').val(),
+                    state: $('#state').val(),
+                    city: $('#city').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(data) {
+                    console.log(data);
+                    var html = '<p class="text-center">Temperature: ' + data['temp'] + '</p>' +
+                               '<p class="text-center">Pressure: ' + data['pressure'] + '</p>' +
+                               '<p class="text-center">Humidity: ' + data['humidity'] + '</p>' +
+                               '<p class="text-center">Country Code: ' + data['country_code'] + '</p>' +
+                               '<p class="text-center">City Name: ' + data['city_name'] + '</p>' +
+                               '<p class="text-center">Coordinates: ' + data['coordinate'] + '</p>';
+                    $('#weather-data').html(html);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
