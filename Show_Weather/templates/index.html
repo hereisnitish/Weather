@@ -7,6 +7,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
     <div class="container mt-5">
@@ -14,28 +16,148 @@
         <form method="POST">
             {% csrf_token %}
             <div class="form-group row">
+
                 <label for="country" class="col-sm-2 col-form-label">Country</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="country" name="country" placeholder="Enter country name">
+                    <select class="form-control" id="country" name="country">
+                        <option value="IND">Select Your Country</option>
+                    </select>
                 </div>
             </div>
+
             <div class="form-group row">
-                <label for="state" class="col-sm-2 col-form-label">State</label>
+                <label for="state" class="col-sm-2 col-form-label">State/Province</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="state" name="state" placeholder="Enter state name">
+                    <select class="form-control" id="state" name="state">
+                        <option value="">Select a state</option>
+                    </select>
                 </div>
             </div>
+
             <div class="form-group row">
                 <label for="city" class="col-sm-2 col-form-label">City</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="city" name="city" placeholder="Enter city name">
+                    <select class="form-control" id="city" name="city">
+                        <option value="">Select a city</option>
+                    </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         <div id="weather-data" class="mt-5"></div>
     </div>
 
+
+
+
+<!--Script for  state  Drop down -->
+<script>
+    var countryDropdown = $('#country');
+    var stateDropdown = $('#state');
+    var cityDropdown = $('#city');
+
+    // Retrieve countries and populate dropdown menu
+    $(document).ready(function() {
+        // Set the API endpoint and headers
+        var apiEndpoint = "https://api.countrystatecity.in/v1/countries";
+        var headers = {
+            "X-CSCAPI-KEY": "Y1JhY0lQdjJLbDVVZ1hydzNxTGdQalhmZUxLZlhtSnRiSXliWHVmRg=="
+        };
+
+        // Make an AJAX request to get the list of countries
+        $.ajax({
+            url: apiEndpoint,
+            method: "GET",
+            headers: headers
+        })
+        .done(function(response) {
+        // Loop through the list of countries and add options for India, USA, Japan, and Korea
+        var countriesDropdown = $("#country");
+        countriesDropdown.append("<option value=''>Select a country</option>");
+
+        var countryNames = ['India', 'United States', 'Japan', 'South Korea'];
+        for (var i = 0; i < response.length; i++) {
+            if (countryNames.includes(response[i].name)) {
+            var countryOption = "<option value='" + response[i].iso2 + "'>" + response[i].name + "</option>";
+            countriesDropdown.append(countryOption);
+            }
+        }
+        })
+        .fail(function(error) {
+            console.log("Error: " + error.responseText);
+        });
+
+        // When the country dropdown changes, get the list of states for that country
+        $("#country").on("change", function() {
+            var selectedCountry = $(this).val();
+
+            // Make an AJAX request to get the list of states for the selected country
+            $.ajax({
+                url: apiEndpoint + "/" + selectedCountry + "/states",
+                method: "GET",
+                headers: headers
+            })
+            .done(function(response) {
+                // Loop through the list of states and add them to the dropdown
+                var statesDropdown = $("#state");
+                statesDropdown.empty();
+                statesDropdown.append("<option value=''>Select a state</option>");
+                console.log(statesDropdown);
+
+                for (var i = 0; i < response.length; i++) {
+                    var stateOption = "<option value='" + response[i].iso2 + "'>" + response[i].name + "</option>";
+                    console.log(stateOption);
+                    statesDropdown.append(stateOption);
+
+                }
+                
+            })
+            .fail(function(error) {
+                console.log("Error: " + error.responseText);
+            });
+        });
+
+        // When the state dropdown changes, get the list of cities for that state
+        $("#state").on("change", function() {
+            var selectedCountry = countryDropdown.val();
+            var selectedState = stateDropdown.val();
+
+            console.log(selectedCountry,selectedState);
+
+            
+
+
+            // Make an AJAX request to get the list of cities for the selected state
+            $.ajax({
+                url: "https://api.countrystatecity.in/v1/countries/"+ selectedCountry + "/states/" + selectedState + "/cities",
+                method: "GET",
+                headers: headers
+            })
+            .done(function(response) {
+                // Loop through the list of cities and add them to the dropdown
+                var citiesDropdown = $("#city");
+                citiesDropdown.empty();
+                citiesDropdown.append("<option value=''>Select a city</option>");
+
+                for (var i = 0; i < response.length; i++) {
+                    var cityOption = "<option value='" + response[i].name + "'>" + response[i].name + "</option>";
+                    citiesDropdown.append(cityOption);
+                }
+            })
+            .fail(function(error) {
+                console.log("Error: " + error.responseText);
+            });
+        });
+    });
+</script>
+
+
+
+
+
+
+
+<!--Script for Submit button -->
     <script>
         $('form').submit(function(e) {
             e.preventDefault();

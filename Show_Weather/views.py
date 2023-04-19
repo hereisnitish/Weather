@@ -10,6 +10,8 @@ from django.shortcuts import render
 
 def index(request):
 
+    
+
     if request.method == 'POST':
         country = request.POST['country']
         state = request.POST['state']
